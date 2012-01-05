@@ -3,6 +3,8 @@
 @interface PhoneNumberFormatter(Private)
 - (NSString *)parseString:(NSString *)input;
 - (NSString *)parseStringStartingWithOne:(NSString *)input;
+- (NSString *)parsePartialStringStartingWithOne:(NSString *)input;
+- (NSString *)parseSevenDigitPhoneNumber:(NSString *)basicNumber;
 @end
 
 @implementation PhoneNumberFormatter
@@ -25,6 +27,19 @@
   return output;
 }
 
+- (NSString *)parseSevenDigitPhoneNumber:(NSString *)basicNumber {
+  NSString *output;
+  NSMutableString *obj = [NSMutableString stringWithString:basicNumber];
+  if ([obj length] >= 4 && [obj length] <= 7) {
+    [obj insertString:@"-" atIndex:3];
+    output = obj;
+  } else {
+    output = obj;
+  }
+  
+  return output;
+}
+
 - (NSString *)parseString:(NSString *)input
 {
   NSMutableString *obj = [NSMutableString stringWithString:input];
@@ -36,41 +51,37 @@
     NSString *firstThree = [obj substringWithRange:NSMakeRange(3, 3)];
     NSString *lastFour   = [obj substringFromIndex:6];
     output = [NSString stringWithFormat:@"(%@) %@-%@", areaCode, firstThree, lastFour];
-  } else if (len >= 4 && len <= 10) {
-    [obj insertString:@"-" atIndex:3];
-    output = obj;
   } else {
-    output = obj;
+    output = [self parseSevenDigitPhoneNumber:obj];
   }
   
   return output;
 }
 
-- (NSString *)parseStringStartingWithOne:(NSString *)input
-{
-  NSMutableString *obj = [NSMutableString stringWithString:input];
-  NSString *output;
-  int len = input.length;
+- (NSString *)parsePartialStringStartingWithOne:(NSString *)input {
+  NSMutableString *partialAreaCode = [NSMutableString stringWithString:[input substringFromIndex:1]];
+  int numSpaces = 3 - partialAreaCode.length;
+  int i;
+  for (i = 0; i < numSpaces; i++) {
+    [partialAreaCode appendString:@" "];
+  }
   
-  if (len >= 2 && len <= 4) {
-    NSMutableString *partialAreaCode = [NSMutableString stringWithString:[obj substringFromIndex:1]];
-    int numSpaces = 3 - partialAreaCode.length;
-    int i;
-    for (i = 0; i < numSpaces; i++) {
-      [partialAreaCode appendString:@" "];
-    }
-    output = [NSString stringWithFormat:@"1 (%@)", partialAreaCode];
-  } else if (len >= 5 && len <= 7) {
-    NSString *areaCode = [obj substringWithRange:NSMakeRange(1, 3)];
-    NSString *rest = [obj substringFromIndex:4];
-    output = [NSString stringWithFormat:@"1 (%@) %@", areaCode, rest];
-  } else if (len >= 8 && len <= 11) {
-    NSString *areaCode   = [obj substringWithRange:NSMakeRange(1, 3)];
-    NSString *firstThree = [obj substringWithRange:NSMakeRange(4, 3)];
-    NSString *rest = [obj substringFromIndex:7];
-    output = [NSString stringWithFormat:@"1 (%@) %@-%@", areaCode, firstThree, rest];
+  return [NSString stringWithFormat:@"1 (%@)", partialAreaCode];
+}
+
+- (NSString *)parseStringStartingWithOne:(NSString *)input {
+  int len = input.length;
+  NSString *output;
+  
+  if (len == 1 || len >= 12) {
+    [self parseSevenDigitPhoneNumber:input];
+  }
+  else if (len > 4) {
+    NSString *firstPart  = [self parsePartialStringStartingWithOne:[input substringToIndex:4]];
+    NSString *secondPart = [self parseSevenDigitPhoneNumber:[input substringFromIndex:4]];
+    output = [NSString stringWithFormat:@"%@ %@", firstPart, secondPart];
   } else {
-    output = obj;
+    output = [NSString stringWithFormat:@"%@", [self parsePartialStringStartingWithOne:input]];
   }
   
   return output;
