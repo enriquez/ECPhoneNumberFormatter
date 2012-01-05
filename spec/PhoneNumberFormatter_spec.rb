@@ -2,11 +2,11 @@ require File.join(File.dirname(__FILE__), '../ext/PhoneNumberFormatter/PhoneNumb
 require File.join(File.dirname(__FILE__), 'spec_helper')
 
 describe PhoneNumberFormatter do
-  describe 'stringForObjectValue:' do
-    before do
-      @phone_number_formatter = PhoneNumberFormatter.alloc.init
-    end
+  before do
+    @phone_number_formatter = PhoneNumberFormatter.alloc.init
+  end
 
+  describe 'stringForObjectValue:' do
     it 'returns (234) 567-7890 for 2345677890' do
       actual = @phone_number_formatter.stringForObjectValue('2345677890')
       actual.should.equal('(234) 567-7890')
@@ -77,6 +77,23 @@ describe PhoneNumberFormatter do
         actual = @phone_number_formatter.stringForObjectValue('123456789000')
         actual.should.equal('123456789000')
       end
+    end
+  end
+
+  describe 'getObjectValue:forString:errorDescription:' do
+    before do
+      @obj = Pointer.new(:id)
+      @errorDescription = nil
+    end
+
+    it 'returns 1 for 1' do
+      actual = @phone_number_formatter.getObjectValue(@obj, forString:'1', errorDescription:@errorDescription)
+      @obj[0].should.equal('1')
+    end
+
+    it 'returns 12345678900 for 1 (234) 567-8900' do
+      actual = @phone_number_formatter.getObjectValue(@obj, forString:'1 (234) 567-8900', errorDescription:@errorDescription)
+      @obj[0].should.equal('12345678900')
     end
   end
 end
