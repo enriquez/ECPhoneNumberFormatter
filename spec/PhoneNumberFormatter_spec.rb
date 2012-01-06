@@ -78,6 +78,11 @@ describe PhoneNumberFormatter do
         actual.should.equal('1 (234) 567-8900')
       end
 
+      it 'returns 1 (234) 567-8900 for 1 (2345) 678-900' do
+        actual = @phone_number_formatter.stringForObjectValue('1 (2345) 678-900')
+        actual.should.equal('1 (234) 567-8900')
+      end
+
       it 'returns 123456789000 for 123456789000' do
         actual = @phone_number_formatter.stringForObjectValue('123456789000')
         actual.should.equal('123456789000')

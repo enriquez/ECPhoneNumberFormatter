@@ -13,13 +13,15 @@
   if (![anObject isKindOfClass:[NSString class]]) return nil;
   if ([anObject length] < 1) return nil;
   
-  NSString *firstNumber = [anObject substringToIndex:1],
+  NSCharacterSet *doNotWant = [NSCharacterSet characterSetWithCharactersInString:@"()- "];
+  NSString *unformatted = [[anObject componentsSeparatedByCharactersInSet: doNotWant] componentsJoinedByString: @""];
+  NSString *firstNumber = [unformatted substringToIndex:1],
            *output;
   
   if ([firstNumber isEqualToString:@"1"]) {
-    output = [self parseStringStartingWithOne:anObject];
+    output = [self parseStringStartingWithOne:unformatted];
   } else {
-    output = [self parseString:anObject];
+    output = [self parseString:unformatted];
   }
   return output;
 }
@@ -33,15 +35,21 @@
 
 - (BOOL)isPartialStringValid:(NSString **)partialStringPtr proposedSelectedRange:(NSRangePointer)proposedSelRangePtr originalString:(NSString *)origString originalSelectedRange:(NSRange)origSelRange errorDescription:(NSString **)error
 {
-  if (origSelRange.length == 1 && [[origString substringFromIndex:origString.length - 1] isEqualToString:@")"]) { // attempting to delete a right parenthensis
+  if (origSelRange.location == 1 && origSelRange.length == 0 && [origString isEqualToString:@"1"]) {
+    *partialStringPtr = [self stringForObjectValue:*partialStringPtr];
+    *proposedSelRangePtr = NSMakeRange(4, 0);
+    return NO;
+  } else if (origSelRange.location == 5 && origSelRange.length == 0 && [[origString substringToIndex:1] isEqualToString:@"1"]) {
+    *partialStringPtr = [self stringForObjectValue:*partialStringPtr];
+    *proposedSelRangePtr = NSMakeRange(9, 0);
+    return NO;
+  } else if (origSelRange.length == 1 && [[origString substringFromIndex:origString.length - 1] isEqualToString:@")"]) { // attempting to delete a right parenthensis
     NSRegularExpression *regex = [NSRegularExpression regularExpressionWithPattern:@"(\\w)\\s{0,3}\\)$" options:NSRegularExpressionCaseInsensitive error:nil];
     
-    *partialStringPtr = [regex stringByReplacingMatchesInString:origString options:NSMatchingWithoutAnchoringBounds range:NSMakeRange(0, origString.length) withTemplate:@""];
+    NSRange matchRange = [regex rangeOfFirstMatchInString:origString options:NSMatchingWithoutAnchoringBounds range:NSMakeRange(0, origString.length)];
     
-    if (origString.length == 7) {
-      *proposedSelRangePtr = NSMakeRange(origSelRange.location - 1, 0);
-    }
-    *proposedSelRangePtr = NSMakeRange(origSelRange.location - 1, 0);
+    *partialStringPtr = [regex stringByReplacingMatchesInString:origString options:NSMatchingWithoutAnchoringBounds range:NSMakeRange(0, origString.length) withTemplate:@""];
+    *proposedSelRangePtr = NSMakeRange(matchRange.location, 0);
     return NO;
   } else {
     return YES;
@@ -64,7 +72,7 @@
 - (NSString *)parseString:(NSString *)input {
   NSMutableString *obj = [NSMutableString stringWithString:input];
   NSString *output;
-  int len = input.length;
+  NSUInteger len = input.length;
   
   if (len >= 8 && len <= 10) {
     NSString *areaCode  = [obj substringToIndex:3]; 
@@ -80,7 +88,7 @@
 
 - (NSString *)parsePartialStringStartingWithOne:(NSString *)input {
   NSMutableString *partialAreaCode = [NSMutableString stringWithString:[input substringFromIndex:1]];
-  int numSpaces = 3 - partialAreaCode.length, i;
+  NSUInteger numSpaces = 3 - partialAreaCode.length, i;
   
   for (i = 0; i < numSpaces; i++) {
     [partialAreaCode appendString:@" "];
@@ -89,7 +97,7 @@
 }
 
 - (NSString *)parseStringStartingWithOne:(NSString *)input {
-  int len = input.length;
+  NSUInteger len = input.length;
   NSString *output;
   
   if (len == 1 || len >= 12) {
