@@ -11,9 +11,9 @@
 
 - (NSString *)stringForObjectValue:(id)anObject {
   if (![anObject isKindOfClass:[NSString class]]) return nil;
+  if ([anObject length] < 1) return nil;
   
-  NSString *firstNumber       = [anObject substringToIndex:1],
-           *unformattedString = [NSString stringWithString:anObject],
+  NSString *firstNumber = [anObject substringToIndex:1],
            *output;
   
   if ([firstNumber isEqualToString:@"1"]) {
@@ -26,9 +26,26 @@
 
 - (BOOL)getObjectValue:(id *)anObject forString:(NSString *)string errorDescription:(NSString **)error {
   NSCharacterSet *doNotWant = [NSCharacterSet characterSetWithCharactersInString:@"()- "];
-  *anObject = [[string componentsSeparatedByCharactersInSet: doNotWant] componentsJoinedByString: @""];
+  *anObject = (id)[[string componentsSeparatedByCharactersInSet: doNotWant] componentsJoinedByString: @""];
   
   return YES;
+}
+
+- (BOOL)isPartialStringValid:(NSString **)partialStringPtr proposedSelectedRange:(NSRangePointer)proposedSelRangePtr originalString:(NSString *)origString originalSelectedRange:(NSRange)origSelRange errorDescription:(NSString **)error
+{
+  if (origSelRange.length == 1 && [[origString substringFromIndex:origString.length - 1] isEqualToString:@")"]) { // attempting to delete a right parenthensis
+    NSRegularExpression *regex = [NSRegularExpression regularExpressionWithPattern:@"(\\w)\\s{0,3}\\)$" options:NSRegularExpressionCaseInsensitive error:nil];
+    
+    *partialStringPtr = [regex stringByReplacingMatchesInString:origString options:NSMatchingWithoutAnchoringBounds range:NSMakeRange(0, origString.length) withTemplate:@""];
+    
+    if (origString.length == 7) {
+      *proposedSelRangePtr = NSMakeRange(origSelRange.location - 1, 0);
+    }
+    *proposedSelRangePtr = NSMakeRange(origSelRange.location - 1, 0);
+    return NO;
+  } else {
+    return YES;
+  }
 }
 
 - (NSString *)parseLastSevenDigits:(NSString *)input {

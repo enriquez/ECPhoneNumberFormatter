@@ -7,6 +7,11 @@ describe PhoneNumberFormatter do
   end
 
   describe 'stringForObjectValue:' do
+    it 'returns nil string when empty string' do
+      actual = @phone_number_formatter.stringForObjectValue('')
+      actual.should.equal(nil)
+    end
+
     it 'returns (234) 567-7890 for 2345677890' do
       actual = @phone_number_formatter.stringForObjectValue('2345677890')
       actual.should.equal('(234) 567-7890')
