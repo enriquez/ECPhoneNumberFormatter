@@ -37,7 +37,6 @@
 
 - (NSString *)stripNonDigits:(NSString *)input
 {
-  NSLog(@"input: %@", input);
   NSCharacterSet *doNotWant = [[NSCharacterSet decimalDigitCharacterSet] invertedSet];
   return [[input componentsSeparatedByCharactersInSet: doNotWant] componentsJoinedByString: @""];
 }
