@@ -66,17 +66,17 @@
   NSString *proposedNewString = *partialStringPtr;
   NSString *formattedNew      = [self stringForObjectValue:proposedNewString];
   NSUInteger formattedLocationNew = 0;
+  NSUInteger lengthAdded          = 0;
   
   if (formattedOld.length > proposedNewString.length) { // removing characters
-    NSUInteger removedCharLength   = origSelRange.location - (*proposedSelRangePtr).location;    
-    formattedLocationNew = [self formattedNewLocationFromOldFormatted:formattedOld formattedNew:formattedNew formattedOldLocation:origSelRange.location lengthAdded:-removedCharLength];
+    lengthAdded = -(origSelRange.location - (*proposedSelRangePtr).location);
   } else if (formattedOld.length < proposedNewString.length) { // adding characters
-    NSUInteger additionalCharLength   = (*proposedSelRangePtr).location - origSelRange.location;
-    formattedLocationNew = [self formattedNewLocationFromOldFormatted:formattedOld formattedNew:formattedNew formattedOldLocation:origSelRange.location lengthAdded:additionalCharLength];
+    lengthAdded = (*proposedSelRangePtr).location - origSelRange.location;
   } else { // replace characters
-    NSUInteger charLength   = origSelRange.length;
-    formattedLocationNew = [self formattedNewLocationFromOldFormatted:formattedOld formattedNew:formattedNew formattedOldLocation:origSelRange.location lengthAdded:charLength];
+    lengthAdded = origSelRange.length;
   }
+  
+  formattedLocationNew = [self formattedNewLocationFromOldFormatted:formattedOld formattedNew:formattedNew formattedOldLocation:origSelRange.location lengthAdded:lengthAdded];
   
   *partialStringPtr = formattedNew;
   *proposedSelRangePtr = NSMakeRange(formattedLocationNew, (*proposedSelRangePtr).length);    
