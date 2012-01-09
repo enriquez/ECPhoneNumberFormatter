@@ -5,6 +5,8 @@
 - (NSString *)parseStringStartingWithOne:(NSString *)input;
 - (NSString *)parsePartialStringStartingWithOne:(NSString *)input;
 - (NSString *)parseLastSevenDigits:(NSString *)basicNumber;
+
+- (NSString *)stripNonDigits:(NSString *)input;
 @end
 
 @implementation PhoneNumberFormatter
@@ -13,8 +15,9 @@
   if (![anObject isKindOfClass:[NSString class]]) return nil;
   if ([anObject length] < 1) return nil;
   
-  NSCharacterSet *doNotWant = [NSCharacterSet characterSetWithCharactersInString:@"()- "];
-  NSString *unformatted = [[anObject componentsSeparatedByCharactersInSet: doNotWant] componentsJoinedByString: @""];
+  NSCharacterSet *doNotWant = [[NSCharacterSet decimalDigitCharacterSet] invertedSet];
+  NSString *unformatted = [[(NSString *)anObject componentsSeparatedByCharactersInSet: doNotWant] componentsJoinedByString: @""];
+  
   NSString *firstNumber = [unformatted substringToIndex:1],
            *output;
   
@@ -27,32 +30,83 @@
 }
 
 - (BOOL)getObjectValue:(id *)anObject forString:(NSString *)string errorDescription:(NSString **)error {
-  NSCharacterSet *doNotWant = [NSCharacterSet characterSetWithCharactersInString:@"()- "];
-  *anObject = (id)[[string componentsSeparatedByCharactersInSet: doNotWant] componentsJoinedByString: @""];
-  
+  *anObject = (id)[self stripNonDigits:string];
   return YES;
+}
+
+- (NSString *)stripNonDigits:(NSString *)input
+{
+  NSLog(@"input: %@", input);
+  NSCharacterSet *doNotWant = [[NSCharacterSet decimalDigitCharacterSet] invertedSet];
+  return [[input componentsSeparatedByCharactersInSet: doNotWant] componentsJoinedByString: @""];
 }
 
 - (BOOL)isPartialStringValid:(NSString **)partialStringPtr proposedSelectedRange:(NSRangePointer)proposedSelRangePtr originalString:(NSString *)origString originalSelectedRange:(NSRange)origSelRange errorDescription:(NSString **)error
 {
-  if (origSelRange.location == 1 && origSelRange.length == 0 && [origString isEqualToString:@"1"]) {
-    *partialStringPtr = [self stringForObjectValue:*partialStringPtr];
-    *proposedSelRangePtr = NSMakeRange(4, 0);
-    return NO;
-  } else if (origSelRange.location == 5 && origSelRange.length == 0 && [[origString substringToIndex:1] isEqualToString:@"1"]) {
-    *partialStringPtr = [self stringForObjectValue:*partialStringPtr];
-    *proposedSelRangePtr = NSMakeRange(9, 0);
-    return NO;
-  } else if (origSelRange.length == 1 && [[origString substringFromIndex:origString.length - 1] isEqualToString:@")"]) { // attempting to delete a right parenthensis
-    NSRegularExpression *regex = [NSRegularExpression regularExpressionWithPattern:@"(\\w)\\s{0,3}\\)$" options:NSRegularExpressionCaseInsensitive error:nil];
+  NSString *formattedOld      = origString;
+  NSString *proposedNewString = *partialStringPtr;
+  NSString *formattedNew      = [self stringForObjectValue:proposedNewString];
+  
+  if (formattedOld.length > proposedNewString.length) { // removing characters
+    // Calculate new cursor position
+    NSUInteger removedCharLength   = origSelRange.location - (*proposedSelRangePtr).location;
+    NSUInteger formattedLocationOld   = origSelRange.location;
+    NSUInteger unformattedLocationOld = [[self stripNonDigits:[formattedOld substringToIndex:formattedLocationOld]] length];
+    NSUInteger unformattedLocationNew = unformattedLocationOld - removedCharLength;
+    NSUInteger formattedLocationNew   = 0;
     
-    NSRange matchRange = [regex rangeOfFirstMatchInString:origString options:NSMatchingWithoutAnchoringBounds range:NSMakeRange(0, origString.length)];
+    while (unformattedLocationNew > 0) {
+      unichar currentCharacter = [formattedNew characterAtIndex:formattedLocationNew];
+      if ([[NSCharacterSet decimalDigitCharacterSet] characterIsMember:currentCharacter]) {
+        unformattedLocationNew--;
+      }
+      
+      formattedLocationNew++;
+    }
     
-    *partialStringPtr = [regex stringByReplacingMatchesInString:origString options:NSMatchingWithoutAnchoringBounds range:NSMakeRange(0, origString.length) withTemplate:@""];
-    *proposedSelRangePtr = NSMakeRange(matchRange.location, 0);
+    *partialStringPtr = formattedNew;
+    *proposedSelRangePtr = NSMakeRange(formattedLocationNew, (*proposedSelRangePtr).length);
     return NO;
-  } else {
-    return YES;
+  } else if (formattedOld.length < proposedNewString.length) { // adding characters
+    // Calculate new cursor position
+    NSUInteger additionalCharLength   = (*proposedSelRangePtr).location - origSelRange.location;
+    NSUInteger formattedLocationOld   = origSelRange.location;
+    NSUInteger unformattedLocationOld = [[self stripNonDigits:[formattedOld substringToIndex:formattedLocationOld]] length];
+    NSUInteger unformattedLocationNew = unformattedLocationOld + additionalCharLength;
+    NSUInteger formattedLocationNew   = 0;
+    
+    while (unformattedLocationNew > 0) {
+      unichar currentCharacter = [formattedNew characterAtIndex:formattedLocationNew];
+      if ([[NSCharacterSet decimalDigitCharacterSet] characterIsMember:currentCharacter]) {
+        unformattedLocationNew--;
+      }
+      
+      formattedLocationNew++;
+    }
+    
+    *partialStringPtr = formattedNew;
+    *proposedSelRangePtr = NSMakeRange(formattedLocationNew, (*proposedSelRangePtr).length);
+    return NO;
+  } else { // replace characters
+    // Calculate new cursor position
+    NSUInteger charLength   = origSelRange.length;
+    NSUInteger formattedLocationOld   = origSelRange.location;
+    NSUInteger unformattedLocationOld = [[self stripNonDigits:[formattedOld substringToIndex:formattedLocationOld]] length];
+    NSUInteger unformattedLocationNew = unformattedLocationOld + charLength;
+    NSUInteger formattedLocationNew   = 0;
+    
+    while (unformattedLocationNew > 0) {
+      unichar currentCharacter = [formattedNew characterAtIndex:formattedLocationNew];
+      if ([[NSCharacterSet decimalDigitCharacterSet] characterIsMember:currentCharacter]) {
+        unformattedLocationNew--;
+      }
+      
+      formattedLocationNew++;
+    }
+    
+    *partialStringPtr = formattedNew;
+    *proposedSelRangePtr = NSMakeRange(formattedLocationNew, (*proposedSelRangePtr).length);    
+    return NO;
   }
 }
 

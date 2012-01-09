@@ -83,6 +83,11 @@ describe PhoneNumberFormatter do
         actual.should.equal('1 (234) 567-8900')
       end
 
+      it 'returns 1 (234) 567-8900 for 1 234.567.8900' do
+        actual = @phone_number_formatter.stringForObjectValue('1 234.567.8900')
+        actual.should.equal('1 (234) 567-8900')
+      end
+
       it 'returns 123456789000 for 123456789000' do
         actual = @phone_number_formatter.stringForObjectValue('123456789000')
         actual.should.equal('123456789000')
@@ -97,12 +102,12 @@ describe PhoneNumberFormatter do
     end
 
     it 'returns 1 for 1' do
-      actual = @phone_number_formatter.getObjectValue(@obj, forString:'1', errorDescription:@errorDescription)
+      @phone_number_formatter.getObjectValue(@obj, forString:'1', errorDescription:@errorDescription)
       @obj[0].should.equal('1')
     end
 
     it 'returns 12345678900 for 1 (234) 567-8900' do
-      actual = @phone_number_formatter.getObjectValue(@obj, forString:'1 (234) 567-8900', errorDescription:@errorDescription)
+      @phone_number_formatter.getObjectValue(@obj, forString:'1 (234) 567-8900', errorDescription:@errorDescription)
       @obj[0].should.equal('12345678900')
     end
   end

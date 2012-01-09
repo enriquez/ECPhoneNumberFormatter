@@ -1,1 +1,2 @@
+framework 'Cocoa'
 require 'bacon'
