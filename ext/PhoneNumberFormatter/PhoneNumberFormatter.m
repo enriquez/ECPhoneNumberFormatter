@@ -7,6 +7,7 @@
 - (NSString *)parseLastSevenDigits:(NSString *)basicNumber;
 
 - (NSString *)stripNonDigits:(NSString *)input;
+- (NSUInteger)formattedNewLocationFromOldFormatted:(NSString *)formattedOld formattedNew:(NSString *)formattedNew formattedOldLocation:(NSUInteger)formattedOldLocation lengthAdded:(NSUInteger)lengthAdded;
 @end
 
 @implementation PhoneNumberFormatter
@@ -41,73 +42,45 @@
   return [[input componentsSeparatedByCharactersInSet: doNotWant] componentsJoinedByString: @""];
 }
 
+- (NSUInteger)formattedNewLocationFromOldFormatted:(NSString *)formattedOld formattedNew:(NSString *)formattedNew formattedOldLocation:(NSUInteger)formattedOldLocation lengthAdded:(NSUInteger)lengthAdded
+{
+  NSUInteger unformattedLocationOld = [[self stripNonDigits:[formattedOld substringToIndex:formattedOldLocation]] length];
+  NSUInteger unformattedLocationNew = unformattedLocationOld + lengthAdded;
+  NSUInteger formattedLocationNew   = 0;
+  
+  while (unformattedLocationNew > 0) {
+    unichar currentCharacter = [formattedNew characterAtIndex:formattedLocationNew];
+    if ([[NSCharacterSet decimalDigitCharacterSet] characterIsMember:currentCharacter]) {
+      unformattedLocationNew--;
+    }
+    
+    formattedLocationNew++;
+  }
+  
+  return formattedLocationNew;
+}
+
 - (BOOL)isPartialStringValid:(NSString **)partialStringPtr proposedSelectedRange:(NSRangePointer)proposedSelRangePtr originalString:(NSString *)origString originalSelectedRange:(NSRange)origSelRange errorDescription:(NSString **)error
 {
   NSString *formattedOld      = origString;
   NSString *proposedNewString = *partialStringPtr;
   NSString *formattedNew      = [self stringForObjectValue:proposedNewString];
+  NSUInteger formattedLocationNew = 0;
   
   if (formattedOld.length > proposedNewString.length) { // removing characters
-    // Calculate new cursor position
-    NSUInteger removedCharLength   = origSelRange.location - (*proposedSelRangePtr).location;
-    NSUInteger formattedLocationOld   = origSelRange.location;
-    NSUInteger unformattedLocationOld = [[self stripNonDigits:[formattedOld substringToIndex:formattedLocationOld]] length];
-    NSUInteger unformattedLocationNew = unformattedLocationOld - removedCharLength;
-    NSUInteger formattedLocationNew   = 0;
-    
-    while (unformattedLocationNew > 0) {
-      unichar currentCharacter = [formattedNew characterAtIndex:formattedLocationNew];
-      if ([[NSCharacterSet decimalDigitCharacterSet] characterIsMember:currentCharacter]) {
-        unformattedLocationNew--;
-      }
-      
-      formattedLocationNew++;
-    }
-    
-    *partialStringPtr = formattedNew;
-    *proposedSelRangePtr = NSMakeRange(formattedLocationNew, (*proposedSelRangePtr).length);
-    return NO;
+    NSUInteger removedCharLength   = origSelRange.location - (*proposedSelRangePtr).location;    
+    formattedLocationNew = [self formattedNewLocationFromOldFormatted:formattedOld formattedNew:formattedNew formattedOldLocation:origSelRange.location lengthAdded:-removedCharLength];
   } else if (formattedOld.length < proposedNewString.length) { // adding characters
-    // Calculate new cursor position
     NSUInteger additionalCharLength   = (*proposedSelRangePtr).location - origSelRange.location;
-    NSUInteger formattedLocationOld   = origSelRange.location;
-    NSUInteger unformattedLocationOld = [[self stripNonDigits:[formattedOld substringToIndex:formattedLocationOld]] length];
-    NSUInteger unformattedLocationNew = unformattedLocationOld + additionalCharLength;
-    NSUInteger formattedLocationNew   = 0;
-    
-    while (unformattedLocationNew > 0) {
-      unichar currentCharacter = [formattedNew characterAtIndex:formattedLocationNew];
-      if ([[NSCharacterSet decimalDigitCharacterSet] characterIsMember:currentCharacter]) {
-        unformattedLocationNew--;
-      }
-      
-      formattedLocationNew++;
-    }
-    
-    *partialStringPtr = formattedNew;
-    *proposedSelRangePtr = NSMakeRange(formattedLocationNew, (*proposedSelRangePtr).length);
-    return NO;
+    formattedLocationNew = [self formattedNewLocationFromOldFormatted:formattedOld formattedNew:formattedNew formattedOldLocation:origSelRange.location lengthAdded:additionalCharLength];
   } else { // replace characters
-    // Calculate new cursor position
     NSUInteger charLength   = origSelRange.length;
-    NSUInteger formattedLocationOld   = origSelRange.location;
-    NSUInteger unformattedLocationOld = [[self stripNonDigits:[formattedOld substringToIndex:formattedLocationOld]] length];
-    NSUInteger unformattedLocationNew = unformattedLocationOld + charLength;
-    NSUInteger formattedLocationNew   = 0;
-    
-    while (unformattedLocationNew > 0) {
-      unichar currentCharacter = [formattedNew characterAtIndex:formattedLocationNew];
-      if ([[NSCharacterSet decimalDigitCharacterSet] characterIsMember:currentCharacter]) {
-        unformattedLocationNew--;
-      }
-      
-      formattedLocationNew++;
-    }
-    
-    *partialStringPtr = formattedNew;
-    *proposedSelRangePtr = NSMakeRange(formattedLocationNew, (*proposedSelRangePtr).length);    
-    return NO;
+    formattedLocationNew = [self formattedNewLocationFromOldFormatted:formattedOld formattedNew:formattedNew formattedOldLocation:origSelRange.location lengthAdded:charLength];
   }
+  
+  *partialStringPtr = formattedNew;
+  *proposedSelRangePtr = NSMakeRange(formattedLocationNew, (*proposedSelRangePtr).length);    
+  return NO;
 }
 
 - (NSString *)parseLastSevenDigits:(NSString *)input {
