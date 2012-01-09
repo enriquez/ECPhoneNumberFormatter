@@ -47,7 +47,7 @@
   NSUInteger unformattedLocationNew = unformattedLocationOld + lengthAdded;
   NSUInteger formattedLocationNew   = 0;
   
-  while (unformattedLocationNew > 0) {
+  while (unformattedLocationNew > 0 && formattedLocationNew < formattedNew.length) {
     unichar currentCharacter = [formattedNew characterAtIndex:formattedLocationNew];
     if ([[NSCharacterSet decimalDigitCharacterSet] characterIsMember:currentCharacter]) {
       unformattedLocationNew--;
@@ -78,7 +78,8 @@
   formattedLocationNew = [self formattedNewLocationFromOldFormatted:formattedOld formattedNew:formattedNew formattedOldLocation:origSelRange.location lengthAdded:lengthAdded];
   
   *partialStringPtr = formattedNew;
-  *proposedSelRangePtr = NSMakeRange(formattedLocationNew, (*proposedSelRangePtr).length);    
+  *proposedSelRangePtr = NSMakeRange(formattedLocationNew, (*proposedSelRangePtr).length);
+  
   return NO;
 }
 
