@@ -1,2 +1,2 @@
 framework 'Cocoa'
-require 'bacon'
+require 'mac_bacon'

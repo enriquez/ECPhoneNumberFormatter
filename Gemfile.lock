@@ -1,0 +1,10 @@
+GEM
+  remote: https://rubygems.org/
+  specs:
+    mac_bacon (1.3)
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  mac_bacon (~> 1.3)

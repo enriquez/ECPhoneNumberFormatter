@@ -18,6 +18,6 @@ end
 
 desc "Run specs"
 task :default => :build do
-  sh "bacon spec/*_spec.rb"
+  sh "macbacon spec/*_spec.rb"
 end
 
