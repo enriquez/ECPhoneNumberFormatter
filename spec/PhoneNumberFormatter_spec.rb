@@ -12,6 +12,11 @@ describe PhoneNumberFormatter do
       actual.should.equal(nil)
     end
 
+    it 'handles non-numerical values' do
+      actual = @phone_number_formatter.stringForObjectValue('*')
+      actual.should.equal(nil)
+    end
+
     it 'returns (234) 567-7890 for 2345677890' do
       actual = @phone_number_formatter.stringForObjectValue('2345677890')
       actual.should.equal('(234) 567-7890')

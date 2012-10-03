@@ -18,7 +18,8 @@
   
   NSCharacterSet *doNotWant = [[NSCharacterSet decimalDigitCharacterSet] invertedSet];
   NSString *unformatted = [[(NSString *)anObject componentsSeparatedByCharactersInSet: doNotWant] componentsJoinedByString: @""];
-  
+  if (unformatted.length == 0) return nil;
+
   NSString *firstNumber = [unformatted substringToIndex:1],
            *output;
   
