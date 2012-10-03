@@ -26,6 +26,23 @@ Format a NSTextField
     // textField.objectValue will be unformatted
     // textField.stringValue will be formatted
 
+## Development
+
+### Requirements
+
+* MacRuby
+* Bundler
+
+### Getting Started
+
+Install dependencies using bundler
+
+    bundle
+
+Run the test suite
+
+    rake
+
 ## MIT License
 
 Copyright (C) 2012 EdgeCase
