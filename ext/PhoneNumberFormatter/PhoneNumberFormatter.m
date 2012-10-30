@@ -143,8 +143,8 @@
 
 @end
 
-void
-Init_PhoneNumberFormatter(void)
+void Init_PhoneNumberFormatter(void);
+void Init_PhoneNumberFormatter(void)
 {
   // Do nothing. This function is required by the MacRuby runtime when this
   // file is compiled as a C extension bundle.
