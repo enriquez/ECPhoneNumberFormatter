@@ -1,0 +1,21 @@
+PODS:
+  - ECPhoneNumberFormatter (0.1.1)
+  - Kiwi/ARC (2.2.3)
+  - Kiwi/NonARC (2.2.3)
+  - Kiwi/XCTest (2.2.3):
+    - Kiwi/ARC
+    - Kiwi/NonARC
+
+DEPENDENCIES:
+  - ECPhoneNumberFormatter (from `../../`)
+  - Kiwi/XCTest (~> 2.2)
+
+EXTERNAL SOURCES:
+  ECPhoneNumberFormatter:
+    :path: ../../
+
+SPEC CHECKSUMS:
+  ECPhoneNumberFormatter: dfe46cb66c9abaf0de357e875d3212e6d6885c32
+  Kiwi: 04c51e880831d291748ec702d42c4101f7eb95c9
+
+COCOAPODS: 0.28.0

@@ -1,0 +1,7 @@
+platform :ios, '7.0'
+
+pod 'ECPhoneNumberFormatter', :path => '../../'
+
+target :ECPhoneNumberFormatterTests, :exclusive => true do
+   pod 'Kiwi/XCTest', '~> 2.2'
+end
