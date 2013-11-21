@@ -15,7 +15,7 @@ EXTERNAL SOURCES:
     :path: ../../
 
 SPEC CHECKSUMS:
-  ECPhoneNumberFormatter: dfe46cb66c9abaf0de357e875d3212e6d6885c32
+  ECPhoneNumberFormatter: 6da090a89f87e784b6bdc058d86cc40e5ef17e79
   Kiwi: 04c51e880831d291748ec702d42c4101f7eb95c9
 
 COCOAPODS: 0.28.0
