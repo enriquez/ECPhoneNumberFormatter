@@ -16,6 +16,8 @@ profile
 *.moved-aside
 DerivedData
 .idea/
+*.xccheckout
+!ECPhoneNumberFormatter.xcworkspace
 
 # CocoaPods
 Tests/ECPhoneNumberFormatter/Pods/**/*
