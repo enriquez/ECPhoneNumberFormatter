@@ -11,7 +11,6 @@ namespace :travis do
   task :install do
     system 'brew uninstall xctool'
     system 'brew install xctool --HEAD'
-    system '(cd Tests/ECPhoneNumberFormatter/ && pod install)'
   end
 
   task :script => 'test'
