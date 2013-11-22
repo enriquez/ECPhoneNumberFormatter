@@ -1,6 +1,7 @@
 desc "Run tests"
 task :test do
-  system 'xctool -workspace Tests/ECPhoneNumberFormatter/ECPhoneNumberFormatter.xcworkspace -scheme ECPhoneNumberFormatter -sdk iphonesimulator test'
+  exit_status = system 'xctool -workspace Tests/ECPhoneNumberFormatter/ECPhoneNumberFormatter.xcworkspace -scheme ECPhoneNumberFormatter -sdk iphonesimulator test'
+  exit(exit_status)
 end
 
 namespace :travis do
