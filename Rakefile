@@ -1,6 +1,6 @@
 desc "Run tests"
 task :test do
-  system 'xctool -workspace Tests/ECPhoneNumberFormatter/ECPhoneNumberFormatter.xcworkspace -scheme ECPhoneNumberFormatter -sdk iphonesimulator test'
+  system 'xctool -workspace Tests/ECPhoneNumberFormatter/ECPhoneNumberFormatter.xcworkspace -scheme ECPhoneNumberFormatter -sdk iphonesimulator -reporter Tests/ao-kiwi-progress test'
   exit($?.exitstatus)
 end
 
