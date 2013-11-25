@@ -12,6 +12,7 @@ namespace :travis do
   task :install do
     system 'brew uninstall xctool'
     system 'brew install xctool --HEAD'
+    system 'bundle install'
   end
 
   task :script => 'test'
