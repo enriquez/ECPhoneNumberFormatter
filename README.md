@@ -7,7 +7,7 @@ NSFormatter subclass for formatting phone numbers.
 ### Format a number
 
 ```objc
-PhoneNumberFormatter *formatter = [[PhoneNumberFormatter alloc] init];
+ECPhoneNumberFormatter *formatter = [[ECPhoneNumberFormatter alloc] init];
 NSString *formattedNumber = [formatter stringForObjectValue:@"2345677890"]
 // formattedNumber = @"(234) 567-7890"
 ```
@@ -15,7 +15,7 @@ NSString *formattedNumber = [formatter stringForObjectValue:@"2345677890"]
 ### Remove formatting
 
 ```objc
-PhoneNumberFormatter *formatter = [[PhoneNumberFormatter alloc] init];
+ECPhoneNumberFormatter *formatter = [[ECPhoneNumberFormatter alloc] init];
 id objectValue;
 NSString *error;
 [formatter getObjectValue:&objectValue forString:@"1 (234) 567-8900" errorDescription:&error];
@@ -25,7 +25,7 @@ NSString *error;
 ### Format a NSTextField 
 
 ```objc
-PhoneNumberFormatter *formatter = [[PhoneNumberFormatter alloc] init];
+ECPhoneNumberFormatter *formatter = [[ECPhoneNumberFormatter alloc] init];
 textField.cell.formatter = formatter;
 
 // textField.objectValue will be unformatted
