@@ -24,9 +24,9 @@
 #import "ECPhoneNumberFormatter.h"
 
 @interface ECPhoneNumberFormatter()
-- (NSString *)parseString:(NSString *)input;
-- (NSString *)parseStringStartingWithOne:(NSString *)input;
-- (NSString *)parsePartialStringStartingWithOne:(NSString *)input;
+- (NSString *)parseString:(NSString *)input withFormat:(ECPhoneNumberFormat)phoneNumberFormat;
+- (NSString *)parseStringStartingWithOne:(NSString *)input withFormat:(ECPhoneNumberFormat)phoneNumberFormat;
+- (NSString *)parsePartialStringStartingWithOne:(NSString *)input withFormat:(ECPhoneNumberFormat)phoneNumberFormat;
 - (NSString *)parseLastSevenDigits:(NSString *)basicNumber;
 
 - (NSString *)stripNonDigits:(NSString *)input;
@@ -41,6 +41,10 @@
 #pragma mark - NSFormatter
 
 - (NSString *)stringForObjectValue:(id)anObject {
+    return [self stringForObjectValue:anObject withFormat:ECPhoneNumberFormatBrackets];
+    }
+            
+- (NSString *)stringForObjectValue:(id)anObject withFormat:(ECPhoneNumberFormat)phoneNumberFormat {
     if (![anObject isKindOfClass:[NSString class]]) return nil;
     if ([anObject length] < 1) return nil;
 
@@ -52,9 +56,9 @@
     *output;
 
     if ([firstNumber isEqualToString:@"1"]) {
-        output = [self parseStringStartingWithOne:unformatted];
+        output = [self parseStringStartingWithOne:unformatted withFormat:phoneNumberFormat];
     } else {
-        output = [self parseString:unformatted];
+        output = [self parseString:unformatted withFormat:phoneNumberFormat];
     }
     return output;
 }
@@ -121,51 +125,67 @@
     if ([obj length] >= 4 && [obj length] <= 7) {
         [obj insertString:@"-" atIndex:3];
         output = obj;
+    } else if ([obj length] >= 8) { // We assume anything after the 7th digit is a phone number extension so add a " x" before it
+        [obj insertString:@"-" atIndex:3];
+        [obj insertString:@" (x" atIndex:8];
+        [obj insertString:@")" atIndex:[obj length]];
+        output = obj;
     } else {
         output = obj;
     }
     return output;
 }
 
-- (NSString *)parseString:(NSString *)input {
+- (NSString *)parseString:(NSString *)input withFormat:(ECPhoneNumberFormat)phoneNumberFormat{
     NSMutableString *obj = [NSMutableString stringWithString:input];
     NSString *output;
     NSUInteger len = input.length;
 
-    if (len >= 8 && len <= 10) {
+    if (len >= 8) {
         NSString *areaCode  = [obj substringToIndex:3];
         NSString *lastSeven = [self parseLastSevenDigits:[obj substringFromIndex:3]];
-        output = [NSString stringWithFormat:@"(%@) %@", areaCode, lastSeven];
+        
+        if ( phoneNumberFormat == ECPhoneNumberFormatBrackets ) {
+            output = [NSString stringWithFormat:@"(%@) %@", areaCode, lastSeven];
+        } else {
+            output = [NSString stringWithFormat:@"%@-%@", areaCode, lastSeven];
+        }
     } else if (len <= 10) {
         output = [self parseLastSevenDigits:obj];
-    } else {
-        output = obj;
     }
+
     return output;
 }
 
-- (NSString *)parsePartialStringStartingWithOne:(NSString *)input {
+- (NSString *)parsePartialStringStartingWithOne:(NSString *)input withFormat:(ECPhoneNumberFormat)phoneNumberFormat {
     NSMutableString *partialAreaCode = [NSMutableString stringWithString:[input substringFromIndex:1]];
+    NSString *output;
     NSUInteger numSpaces = 3 - partialAreaCode.length, i;
 
     for (i = 0; i < numSpaces; i++) {
         [partialAreaCode appendString:@" "];
     }
-    return [NSString stringWithFormat:@"1 (%@)", partialAreaCode];
+    
+    if ( phoneNumberFormat == ECPhoneNumberFormatBrackets ) {
+        output = [NSString stringWithFormat:@"1 (%@)", partialAreaCode];
+    } else {
+        output = [NSString stringWithFormat:@"1-%@", partialAreaCode];
+    }
+    return output;
 }
 
-- (NSString *)parseStringStartingWithOne:(NSString *)input {
+- (NSString *)parseStringStartingWithOne:(NSString *)input withFormat:(ECPhoneNumberFormat)phoneNumberFormat {
     NSUInteger len = input.length;
     NSString *output;
 
-    if (len == 1 || len >= 12) {
+    if (len == 1) {
         output = input;
     } else if (len > 4) {
-        NSString *firstPart  = [self parsePartialStringStartingWithOne:[input substringToIndex:4]];
+        NSString *firstPart  = [self parsePartialStringStartingWithOne:[input substringToIndex:4] withFormat:phoneNumberFormat];
         NSString *secondPart = [self parseLastSevenDigits:[input substringFromIndex:4]];
         output = [NSString stringWithFormat:@"%@ %@", firstPart, secondPart];
     } else {
-        output = [NSString stringWithFormat:@"%@", [self parsePartialStringStartingWithOne:input]];
+        output = [NSString stringWithFormat:@"%@", [self parsePartialStringStartingWithOne:input withFormat:phoneNumberFormat]];
     }
 
     return output;

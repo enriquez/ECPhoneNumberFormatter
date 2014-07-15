@@ -23,5 +23,15 @@
 
 #import <Foundation/Foundation.h>
 
+enum {
+    ECPhoneNumberFormatBrackets = 1,
+    ECPhoneNumberFormatDashes
+};
+
+typedef NSInteger ECPhoneNumberFormat;
+
 @interface ECPhoneNumberFormatter : NSFormatter
+
+- (NSString *)stringForObjectValue:(id)anObject withFormat:(ECPhoneNumberFormat)phoneNumberFormat;
+
 @end
