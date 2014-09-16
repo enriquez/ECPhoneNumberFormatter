@@ -71,16 +71,16 @@ describe(@"ECPhoneNumberFormatter", ^{
         });
 
         describe(@"starting with a 1", ^{
-            it(@"returns 1 (2  ) for 12", ^{
-                [[[phoneNumberFormatter stringForObjectValue:@"12"] should] equal:@"1 (2  )"];
+            it(@"returns 12 for 12", ^{
+                [[[phoneNumberFormatter stringForObjectValue:@"12"] should] equal:@"12"];
             });
 
-            it(@"returns 1 (23 ) for 123", ^{
-                [[[phoneNumberFormatter stringForObjectValue:@"123"] should] equal:@"1 (23 )"];
+            it(@"returns 123 for 123", ^{
+                [[[phoneNumberFormatter stringForObjectValue:@"123"] should] equal:@"123"];
             });
 
-            it(@"returns 1 (234) for 1234", ^{
-                [[[phoneNumberFormatter stringForObjectValue:@"1234"] should] equal:@"1 (234)"];
+            it(@"returns 1234 for 1234", ^{
+                [[[phoneNumberFormatter stringForObjectValue:@"1234"] should] equal:@"1234"];
             });
 
             it(@"returns 1 (234) 5 for 12345", ^{
